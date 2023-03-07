@@ -1,18 +1,26 @@
 const express = require('express');
-
+const DBconfig = require('./DBconfig/DBconfig')
 const app = express();
 
-app.get('/login', (req, res)=>{
-    res.send("Hello Login");
-})
+//Connect to DB
+DBconfig();
+
+//Middleware for JSON data
+app.use(express.json())
+
 
 app.get('/', (req, res)=>{
     res.send("Hello World");
 })
 
-app.post('/register', (req, res)=>{
 
-    res.send("Hello register");
+app.get('/login', (req, res)=>{
+    res.send("Hello Login");
+})
+
+
+app.post('/register', (req, res)=>{
+    res.send(req.body);
 })
 
 
