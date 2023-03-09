@@ -2,30 +2,34 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const exercisesSchema = new Schema({
+const Exercise = new Schema({
 
   name: {
     type: String,
+    trim: true,
     required: [true, "name is required"],
   },
 
   description: {
      type: String,
-     required: [true, "description is required"] 
  },
 
   type: {
     type: String,
     required: [true, "type is required"],
+    enum: ["Walk", "Swim", "Hike", "Run", "Ride Bicycle"]
   },
 
-  duration: Number,
+  duration:{
+    type: Number,
+    required: true
+  },
 
   date: {
     type: String,
-    required: [true, "date is required"],
+    default: Date.now()
   }
 
 });
 
-module.exports = mongoose.model("exercises", exercisesSchema);
+module.exports = mongoose.model("exercise", Exercise);

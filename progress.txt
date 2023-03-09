@@ -1,24 +1,23 @@
 APIs
 
-
 1. /login
 
 2. /register
 
-3. /addexercise
+3. /addExercise
 
-4. /getallexercise
+4. /getAllExercise
 
-5. /getuserbyid
+5. /getUserByiId
 
-6. /getexercisebyid
+6. /getExerciseById
 
-7. /getexercisebytype
+7. /getExerciseByType
 
-8. /deleteexercisebyid
+8. /deleteExerciseById
 
-9. /deleteuserbyid
+9. /deleteUserById
 
-10. /updateexercisebyid
+10. /updateExerciseById
 
-11. /updateuserbyid
+11. /updateUserUyId

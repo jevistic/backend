@@ -2,11 +2,14 @@ const express = require('express');
 const DBconfig = require('./DBconfig/DBconfig');
 const app = express();
 
-const JWT =  require("jsonwebtoken")
+const cors = require('cors');
+
+const JWT =  require('jsonwebtoken')
+
 const cookieParser =  require("cookie-parser")
 
-const usersSchema = require("./model/usersSchema");
-const exercisesSchema = require("./model/exercisesSchema");
+const User = require("./model/User");
+const Exercise = require("./model/Exercise");
 
 //Connect to DB
 DBconfig();
@@ -17,11 +20,17 @@ const myKey = "123!@#aJK";
 //Middleware to parse res.body
 app.use(express.json())
 
+//Middleware to parse cookies
+app.use(cookieParser());
+
+//Middleware to allow cors
+app.use(cors());
+
 
 //Authentication
-app.use(["/addExercise", "/getAllExercises"],(req,res,next)=>{
+app.use(["/addExercise", "/getAllExercises", "updateUserById", "updateExerciseById", '/getUserById'],(req,res,next)=>{
     
-    const Token =  req.cookies.Token
+    const Token =  req.cookies.Token;
 
      if(Token==null){
 
@@ -35,7 +44,7 @@ app.use(["/addExercise", "/getAllExercises"],(req,res,next)=>{
              if(err){
                  res.status(401).send("Not Authenticated!")
              }
-             req.MyUser =  user
+             //req.MyUser =  user
              next()
          })
      }
@@ -49,14 +58,14 @@ app.get('/', (req, res)=>{
 })
 
 
-app.get('/login', async (req, res)=>{
+app.post('/login', async (req, res)=>{
 
     const { email, password } = req.body;
 
-    const result = await usersSchema.findOne( {email: email, password: password} )
+    const result = await User.findOne( {email: email, password: password} )
 
     if(result==null){
-        res.send("Login failed!")
+        res.json("Login failed!")
     }
     
     else{
@@ -68,9 +77,11 @@ app.get('/login', async (req, res)=>{
     
          const Token = JWT.sign(obj,myKey)
     
-         res.cookie("Token",Token);
+        //  res.cookie("Token",Token);
        
-        res.send("Signed in as: " + result.firstname + " " + result.lastname);
+        // res.json("Signed in as: " + result.firstname + " " + result.lastname);
+
+        res.json({token: Token})
     }
 
 
@@ -81,7 +92,7 @@ app.post('/register',  async (req, res)=>{
     const {firstname, lastname, email, phone, password, dob, gender} = req.body;
 
     try{
-       const result = await usersSchema.create({
+       const result = await User.create({
             firstname: firstname,
             lastname: lastname,
             email: email,
@@ -114,7 +125,7 @@ app.put('/updateUserById',  async (req, res)=>{
     const {id, firstname, lastname, email, phone, password, dob, gender} = req.body;
 
     try{
-       const result = await usersSchema.updateOne({_id: id}, {
+       const result = await User.updateOne({_id: id}, {
             firstname: firstname,
             lastname: lastname,
             email: email,
@@ -138,7 +149,7 @@ app.post('/addExercise', async (req, res)=>{
     const {name, description, type, duration, date} = req.body;
 
     try{
-        const result = await exercisesSchema.create({
+        const result = await Exercise.create({
             name: name,
             description: description,
             type: type,
@@ -162,7 +173,7 @@ app.put('/updateExerciseById', async (req, res)=>{
     var newValues = { $set: {name: name, description: description, type: type, duration: duration, date: date } };
 
     try{
-        const result = await exercisesSchema.updateOne( myQuery, newValues )
+        const result = await Exercise.updateOne( myQuery, newValues )
         res.send("Exercise updated successfully!")
     }
     catch(err){
@@ -174,7 +185,7 @@ app.put('/updateExerciseById', async (req, res)=>{
 
 app.get('/getAllExercises', async (req, res)=>{
 
-    const result = await exercisesSchema.find({})
+    const result = await Exercise.find({})
     const r = await JSON.stringify(result);
     res.send(r);
 
@@ -184,7 +195,7 @@ app.get('/getUserById', async (req, res)=>{
 
     const {id} = req.body;
 
-    const result = await usersSchema.findOne({_id: id});
+    const result = await User.findOne({_id: id});
 
     const r = await JSON.stringify(result);
     res.send(r);
@@ -195,7 +206,7 @@ app.delete('/deleteUserById', async (req, res)=>{
 
     const {id} = req.body;
 
-    const result = await usersSchema.deleteOne({_id: id});
+    const result = await User.deleteOne({_id: id});
 
     const r = await JSON.stringify(result);
     res.send(r);
@@ -206,7 +217,7 @@ app.get('/getExerciseById', async (req, res)=>{
 
     const {id} = req.body;
 
-    const result = await exercisesSchema.findOne({_id : id})
+    const result = await Exercise.findOne({_id : id})
     const r = await JSON.stringify(result);
     res.send(r);
 
@@ -216,7 +227,7 @@ app.get('/getExerciseByType', async (req, res)=>{
 
     const {type} = req.body;
     
-    const result = await exercisesSchema.findOne({type : type})
+    const result = await Exercise.findOne({type : type})
     const r = await JSON.stringify(result);
     res.send(r);
 
@@ -226,7 +237,7 @@ app.delete('/deleteExerciseById', async (req, res)=>{
 
     const {id} = req.body;
     
-    const result = await exercisesSchema.deleteOne({_id : id})
+    const result = await Exercise.deleteOne({_id : id})
     const r = await JSON.stringify(result);
     res.send(r);
 
