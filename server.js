@@ -2,29 +2,77 @@ const express = require('express');
 const DBconfig = require('./DBconfig/DBconfig');
 const app = express();
 
+const JWT =  require("jsonwebtoken")
+const cookieParser =  require("cookie-parser")
+
 const usersSchema = require("./model/usersSchema");
 const exercisesSchema = require("./model/exercisesSchema");
 
 //Connect to DB
 DBconfig();
 
-//Middleware for JSON data
+//Secret Key
+const myKey = "123!@#aJK";
+
+//Middleware to parse res.body
 app.use(express.json())
 
 
+//Authentication
+app.use(["/addExercise", "/getAllExercises"],(req,res,next)=>{
+    
+    const Token =  req.cookies.Token
+
+     if(Token==null){
+
+         res.status(400).send("No Token Available!")
+
+     }
+
+     else{
+
+         JWT.verify(Token,myKey,(err,user)=>{
+             if(err){
+                 res.status(401).send("Not Authenticated!")
+             }
+             req.MyUser =  user
+             next()
+         })
+     }
+ 
+ })
+
+
+
 app.get('/', (req, res)=>{
-    res.send("Hello World");
+    res.send("Homepage");
 })
 
 
-app.post('/login', async (req, res)=>{
+app.get('/login', async (req, res)=>{
 
     const { email, password } = req.body;
+
     const result = await usersSchema.findOne( {email: email, password: password} )
-    if(result)
-        res.send("Logged in successfully as " + email);
-    else
-        res.send("Login failed");
+
+    if(result==null){
+        res.send("Login failed!")
+    }
+    
+    else{
+
+        const obj = {
+            id:result._id,
+            email:result.email      
+         }
+    
+         const Token = JWT.sign(obj,myKey)
+    
+         res.cookie("Token",Token);
+       
+        res.send("Signed in as: " + result.firstname + " " + result.lastname);
+    }
+
 
 })
 
@@ -43,6 +91,16 @@ app.post('/register',  async (req, res)=>{
             gender: gender
         })
 
+        const obj = {
+            id:result["_id"],
+            email:result["email"]       
+        }
+    
+        const Token = JWT.sign(obj,myKey)
+    
+        res.cookie("Token",Token)
+        console.log(result)
+
         res.send("User Registered Successfully!")
     }
     catch(err){
@@ -52,7 +110,7 @@ app.post('/register',  async (req, res)=>{
 
 
 
-app.put('/updateuserbyid',  async (req, res)=>{
+app.put('/updateUserById',  async (req, res)=>{
     const {id, firstname, lastname, email, phone, password, dob, gender} = req.body;
 
     try{
@@ -75,7 +133,7 @@ app.put('/updateuserbyid',  async (req, res)=>{
 
 
 
-app.post('/addexercise', async (req, res)=>{
+app.post('/addExercise', async (req, res)=>{
 
     const {name, description, type, duration, date} = req.body;
 
@@ -96,7 +154,7 @@ app.post('/addexercise', async (req, res)=>{
 })
 
 
-app.put('/updateexercisebyid', async (req, res)=>{
+app.put('/updateExerciseById', async (req, res)=>{
 
     const {id, name, description, type, duration, date} = req.body;
 
@@ -114,7 +172,7 @@ app.put('/updateexercisebyid', async (req, res)=>{
 })
 
 
-app.get('/getexercises', async (req, res)=>{
+app.get('/getAllExercises', async (req, res)=>{
 
     const result = await exercisesSchema.find({})
     const r = await JSON.stringify(result);
@@ -122,7 +180,7 @@ app.get('/getexercises', async (req, res)=>{
 
 })
 
-app.get('/getuserbyid', async (req, res)=>{
+app.get('/getUserById', async (req, res)=>{
 
     const {id} = req.body;
 
@@ -133,7 +191,7 @@ app.get('/getuserbyid', async (req, res)=>{
     
 })
 
-app.delete('/deleteuserbyid', async (req, res)=>{
+app.delete('/deleteUserById', async (req, res)=>{
 
     const {id} = req.body;
 
@@ -144,7 +202,7 @@ app.delete('/deleteuserbyid', async (req, res)=>{
     
 })
 
-app.get('/getexercisebyid', async (req, res)=>{
+app.get('/getExerciseById', async (req, res)=>{
 
     const {id} = req.body;
 
@@ -154,7 +212,7 @@ app.get('/getexercisebyid', async (req, res)=>{
 
 })
 
-app.get('/getexercisebytype', async (req, res)=>{
+app.get('/getExerciseByType', async (req, res)=>{
 
     const {type} = req.body;
     
@@ -164,7 +222,7 @@ app.get('/getexercisebytype', async (req, res)=>{
 
 })
 
-app.delete('/deleteexercisebyid', async (req, res)=>{
+app.delete('/deleteExerciseById', async (req, res)=>{
 
     const {id} = req.body;
     
