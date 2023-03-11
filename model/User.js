@@ -28,10 +28,13 @@ const User = new Schema({
   password: {
     type: String,
     required: [true, "password is required"],
-    minlength: [8, "Password Must Be More Than Of 8 Char"],
+    minlength: [8, "Password Must Be Minimum 8 Characters"],
   },
   dob: String,
-  gender: String,
+  gender: {
+    type: String,
+    // enum
+  },
 
   exercises: [
     {
