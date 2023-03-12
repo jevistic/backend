@@ -28,7 +28,7 @@ app.use(cors());
 
 
 //Authentication
-app.use(["/addExercise", "/getAllExercises", "updateUserById", "updateExerciseById", '/getUserById'],(req,res,next)=>{
+app.use(["/addExercise", "/getAllExercises", "updateUser", "updateExerciseById", "/getUser", "/deleteUser"],(req,res,next)=>{
     
     const Token =  req.cookies.Token;
 
@@ -44,7 +44,7 @@ app.use(["/addExercise", "/getAllExercises", "updateUserById", "updateExerciseBy
              if(err){
                  res.status(401).send("Not Authenticated!")
              }
-             //req.MyUser =  user
+             req.data =  user;
              next()
          })
      }
@@ -61,29 +61,35 @@ app.get('/', (req, res)=>{
 app.post('/login', async (req, res)=>{
 
     const { email, password } = req.body;
+    try{
 
-    const result = await User.findOne( {email: email, password: password} )
+        const result = await User.findOne( {email: email, password: password} )
 
-    if(result==null){
-        res.json("Login failed!")
+        if(result==null){
+            res.send("Invalid credentials")
+            // res.json({LoginFailed:"Login Failed"})
+        }
+        
+        else{
+    
+            const obj = {
+                id:result._id
+            }
+        
+            const Token = JWT.sign(obj,myKey)
+        
+            res.cookie("Token",Token);
+           
+            // res.json("Signed in as: " + result.firstname + " " + result.lastname);
+    
+            res.json({token: Token})
+        }
+
+    }
+    catch(err){
+        res.send(err.message)
     }
     
-    else{
-
-        const obj = {
-            id:result._id,
-            email:result.email      
-         }
-    
-         const Token = JWT.sign(obj,myKey)
-    
-        //  res.cookie("Token",Token);
-       
-        // res.json("Signed in as: " + result.firstname + " " + result.lastname);
-
-        res.json({token: Token})
-    }
-
 
 })
 
@@ -103,8 +109,7 @@ app.post('/register',  async (req, res)=>{
         })
 
         const obj = {
-            id:result["_id"],
-            email:result["email"]       
+            id:result["_id"]      
         }
     
         const Token = JWT.sign(obj,myKey)
@@ -121,8 +126,9 @@ app.post('/register',  async (req, res)=>{
 
 
 
-app.put('/updateUserById',  async (req, res)=>{
-    const {id, firstname, lastname, email, phone, password, dob, gender} = req.body;
+app.put('/updateUser',  async (req, res)=>{
+    const id = req.data.id;
+    const {firstname, lastname, email, phone, password, dob, gender} = req.body;
 
     try{
        const result = await User.updateOne({_id: id}, {
@@ -146,17 +152,23 @@ app.put('/updateUserById',  async (req, res)=>{
 
 app.post('/addExercise', async (req, res)=>{
 
+
     const {name, description, type, duration, date} = req.body;
 
     try{
+        let userId = req.data.id;
+        
         const result = await Exercise.create({
             name: name,
             description: description,
             type: type,
             duration: duration,
             date: date
-        })
-        res.send("Exercise added successfully!")
+        });
+
+        const a = await User.findByIdAndUpdate({_id: userId}, { $push: { exercises: result._id } });
+        res.send("Exercise added successfully!");
+        console.log(result);
     }
     catch(err){
         res.status(400).send(err.message);
@@ -185,31 +197,42 @@ app.put('/updateExerciseById', async (req, res)=>{
 
 app.get('/getAllExercises', async (req, res)=>{
 
-    const result = await Exercise.find({})
-    const r = await JSON.stringify(result);
-    res.send(r);
+    let result;
+    try{
+        let userId = req.data.id;
 
+        result = await User.findById(userId).populate("exercises")
+    }
+    catch(err){
+        console.log(err.message);
+        res.send(err.message)
+    }
+    
+    //const r = await JSON.stringify(result);
+
+    res.send(result.exercises);
 })
 
-app.get('/getUserById', async (req, res)=>{
+app.get('/getUser', async (req, res)=>{
 
-    const {id} = req.body;
+    const id = req.data.id;
 
     const result = await User.findOne({_id: id});
 
-    const r = await JSON.stringify(result);
-    res.send(r);
+    //const r = await JSON.stringify(result);
+    res.send(result);
     
 })
 
-app.delete('/deleteUserById', async (req, res)=>{
+app.delete('/deleteUser', async (req, res)=>{
 
-    const {id} = req.body;
+    const id = req.data.id;
 
     const result = await User.deleteOne({_id: id});
 
-    const r = await JSON.stringify(result);
-    res.send(r);
+    // const r = await JSON.stringify(result);
+    res.cookie("Token",null);
+    res.send(result);
     
 })
 
@@ -241,6 +264,11 @@ app.delete('/deleteExerciseById', async (req, res)=>{
     const r = await JSON.stringify(result);
     res.send(r);
 
+})
+
+app.get('/logout', (req, res)=>{
+    //const userId = req.data.id;
+    req.cookie("Token", null);
 })
 
 
