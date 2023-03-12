@@ -11,8 +11,9 @@ const Exercise = new Schema({
   },
 
   description: {
-     type: String,
- },
+    trim: true,
+    type: String,
+  },
 
   type: {
     type: String,
@@ -26,10 +27,10 @@ const Exercise = new Schema({
   },
 
   date: {
-    type: String,
+    type: Date,
     default: Date.now()
   }
 
 });
 
-module.exports = mongoose.model("exercise", Exercise);
+module.exports = mongoose.model("Exercise", Exercise);

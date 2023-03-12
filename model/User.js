@@ -24,7 +24,7 @@ const User = new Schema({
     unique: [true, "email must me unique"],
   },
 
-  phone: Number,
+  phone: String,
   password: {
     type: String,
     required: [true, "password is required"],
@@ -42,4 +42,4 @@ const User = new Schema({
 
 });
 
-module.exports = mongoose.model("user", User);
+module.exports = mongoose.model("User", User);
