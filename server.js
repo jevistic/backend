@@ -66,8 +66,10 @@ app.post('/login', async (req, res)=>{
         const result = await User.findOne( {email: email, password: password} )
 
         if(result==null){
-            res.send("Invalid credentials")
-            // res.json({LoginFailed:"Login Failed"})
+            const data = {
+                "message": "Invalid credentials!"
+            };
+            res.status(401).send(data)
         }
         
         else{
@@ -82,12 +84,17 @@ app.post('/login', async (req, res)=>{
            
             // res.json("Signed in as: " + result.firstname + " " + result.lastname);
     
-            res.json({token: Token})
+            const data = {
+                "message": "Loggedin Successfully!",
+                "token": Token
+            };
+            res.send(data)
+            // res.json({token: Token})
         }
 
     }
     catch(err){
-        res.send(err.message)
+        res.status(400).send(err.message);
     }
     
 
@@ -117,7 +124,11 @@ app.post('/register',  async (req, res)=>{
         res.cookie("Token",Token)
         console.log(result)
 
-        res.send("User Registered Successfully!")
+        const data = {
+            "message": "User Registered Successfully!",
+            "token": Token
+        };
+        res.send(data)
     }
     catch(err){
         res.status(400).send(err.message);
