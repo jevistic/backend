@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 let DBconfig = ()=>{
-    mongoose.connect("mongodb://localhost:27017/users").then(()=>{
+    mongoose.connect("mongodb://127.0.0.1:27017/users").then(()=>{
 
     console.log("I am connected");
 
