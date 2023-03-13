@@ -18,7 +18,7 @@ const Exercise = new Schema({
   type: {
     type: String,
     required: [true, "type is required"],
-    enum: ["Walk", "Swim", "Hike", "Run", "Ride Bicycle"]
+    enum: ["walk", "swim", "hike", "run", "bicycle_ride"]
   },
 
   duration:{

@@ -30,7 +30,8 @@ app.use(cors());
 //Authentication
 app.use(["/addExercise", "/getAllExercises", "updateUser", "updateExerciseById", "/getUser", "/deleteUser"],(req,res,next)=>{
     
-    const Token =  req.cookies.Token;
+    // const Token =  req.cookies.Token;
+    const Token =  req.headers.authorization;
 
      if(Token==null){
 
@@ -267,13 +268,20 @@ app.get('/getExerciseByType', async (req, res)=>{
 
 })
 
-app.delete('/deleteExerciseById', async (req, res)=>{
+app.post('/deleteExerciseById', async (req, res)=>{
 
     const {id} = req.body;
+    console.log(id);
+
+    try {
+        const result = await Exercise.deleteOne({_id : id})
+        const r = await JSON.stringify(result);
+        res.send(r);
+    } catch (error) {
+        res.status(404).send(error.message);
+    }
     
-    const result = await Exercise.deleteOne({_id : id})
-    const r = await JSON.stringify(result);
-    res.send(r);
+    
 
 })
 
