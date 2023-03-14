@@ -85,13 +85,18 @@ app.post('/register',  async (req, res) => {
         res.send(data)
     }
     catch(err){
-        // let custom_errors = {}
-        // for (const field in err.errors) {
-        //     custom_errors[field] = err.errors[field].message;
-        //     res.status(403).send( custom_errors );
-        // }
-        const key = Object.keys(err.errors)[0];
-        res.status(403).send( err.errors );
+        let custom_errors = {}
+        if(err.code==11000){
+           custom_errors["Duplicate"] = "Email Already Exsit"
+        }
+        for (const field in err.errors) {
+            custom_errors[field] = err.errors[field].message;
+            // res.status(403).send( custom_errors );
+        }
+        // const key = Object.keys(err.errors)[0];
+        
+       
+        res.status(403).send( custom_errors );
     }
 })
 app.put('/updateUser',  async (req, res) => {
