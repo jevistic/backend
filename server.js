@@ -177,10 +177,19 @@ app.delete('/deleteUser', async (req, res)=>{
     res.send(result);
 })
 app.get('/getExerciseById', async (req, res)=>{
-    const {id} = req.body;
-    const result = await Exercise.findOne({_id : id})
-    const r = await JSON.stringify(result);
-    res.send(r);
+    try {
+        const {id} = req.body;
+        const result = await Exercise.findOne({_id : id})
+        // const data = await JSON.stringify(result);
+        // const data = {
+        //      "message": "User Registered Successfully!",
+        //      "token": Token
+        //  };
+         res.send(result)
+     }
+     catch (err) {
+        res.status(403).send( err.message );
+     }
 })
 app.get('/getExerciseByType', async (req, res)=>{
     const {type} = req.body;
