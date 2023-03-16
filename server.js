@@ -1,5 +1,5 @@
 const express = require('express');
-const DBconfig = require('./DBconfig/DBconfig');
+const DBconfig = require('./config/DBconfig');
 const app = express();
 
 const cors = require('cors');
@@ -11,11 +11,11 @@ const cookieParser =  require("cookie-parser")
 const User = require("./model/User");
 const Exercise = require("./model/Exercise");
 
+const {JWT_KEY} = require('./config/keys')
+
 //Connect to DB
 DBconfig();
 
-//Secret Key
-const myKey = "123!@#aJK";
 
 //Middleware to parse res.body
 app.use(express.json())
@@ -41,7 +41,7 @@ app.use(["/addExercise", "/getAllExercises", "updateUser", "updateExerciseById",
 
      else{
 
-         JWT.verify(Token,myKey,(err,user)=>{
+         JWT.verify(Token,JWT_KEY,(err,user)=>{
              if(err){
                  res.status(401).send("Not Authenticated!")
              }
@@ -79,7 +79,7 @@ app.post('/login', async (req, res)=>{
                 id:result._id
             }
         
-            const Token = JWT.sign(obj,myKey)
+            const Token = JWT.sign(obj,JWT_KEY)
         
             res.cookie("Token",Token);
            
@@ -120,7 +120,7 @@ app.post('/register',  async (req, res)=>{
             id:result["_id"]      
         }
     
-        const Token = JWT.sign(obj,myKey)
+        const Token = JWT.sign(obj,JWT_KEY)
     
         res.cookie("Token",Token)
         console.log(result)
@@ -285,10 +285,23 @@ app.post('/deleteExerciseById', async (req, res)=>{
 
 })
 
+
+
 app.get('/logout', (req, res)=>{
     //const userId = req.data.id;
     req.cookie("Token", null);
 })
+
+
+if(process.env.NODE_ENV == 'production'){
+    const path = require('path');
+    
+    app.get('/', (req, res)=>{
+        app.use(express.static(path.resolve(__dirname, 'client', 'build')))
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
+    })
+}
+
 
 
 app.listen(3000, ()=>{
