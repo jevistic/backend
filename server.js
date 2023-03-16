@@ -1,14 +1,10 @@
 const express = require('express');
-<<<<<<< HEAD
-const DBconfig = require('./config/DBconfig');
 const app = express();
+const DBconfig = require('./config/DBconfig');
 
-=======
->>>>>>> 140755ddaca3cfd596341c1ce13bd55306481c51
 const cors = require('cors');
 const cookieParser =  require("cookie-parser")
 const JWT = require('jsonwebtoken')
-const DB = require('./Config/Database');
 require('dotenv').config();
 // Created Modules
 const User = require("./Models/User");
@@ -17,10 +13,8 @@ const Middlewares = require('./Middlewares/Middlewares')
 // const APIs = require('./Routes/api')
 
 // Init Modules
-const app = express();
-DB();
 
-<<<<<<< HEAD
+
 const {JWT_KEY} = require('./config/keys')
 
 //Connect to DB
@@ -28,10 +22,6 @@ DBconfig();
 
 
 //Middleware to parse res.body
-=======
-// Middlewares
-// parse res.body
->>>>>>> 140755ddaca3cfd596341c1ce13bd55306481c51
 app.use(express.json())
 // parse cookies
 app.use(cookieParser());
@@ -41,41 +31,10 @@ app.use(cors());
 Middlewares(app, JWT);
 
 // Secret Key
-const jwt_key = process.env.JWT_KEY;
+// const jwt_key = process.env.JWT_KEY;
 
-<<<<<<< HEAD
-//Authentication
-app.use(["/addExercise", "/getAllExercises", "updateUser", "updateExerciseById", "/getUser", "/deleteUser"],(req,res,next)=>{
-    
-    // const Token =  req.cookies.Token;
-    const Token =  req.headers.authorization;
-
-     if(Token==null){
-
-         res.status(400).send("No Token Available!")
-
-     }
-
-     else{
-
-         JWT.verify(Token,JWT_KEY,(err,user)=>{
-             if(err){
-                 res.status(401).send("Not Authenticated!")
-             }
-             req.data =  user;
-             next()
-         })
-     }
- 
- })
-
-
-
-app.get('/', (req, res)=>{
-=======
 // APIs
 app.get('/', (req, res) => {
->>>>>>> 140755ddaca3cfd596341c1ce13bd55306481c51
     res.send("Homepage");
 })
 app.post('/login', async (req, res)=>{
@@ -92,13 +51,9 @@ app.post('/login', async (req, res)=>{
             const obj = {
                 id:result._id
             }
-<<<<<<< HEAD
         
             const Token = JWT.sign(obj,JWT_KEY)
         
-=======
-            const Token = JWT.sign(obj,jwt_key)
->>>>>>> 140755ddaca3cfd596341c1ce13bd55306481c51
             res.cookie("Token",Token);
             // res.json("Signed in as: " + result.firstname + " " + result.lastname);
             const data = {
@@ -128,13 +83,9 @@ app.post('/register',  async (req, res) => {
         const obj = {
             id:result["_id"]      
         }
-<<<<<<< HEAD
     
         const Token = JWT.sign(obj,JWT_KEY)
     
-=======
-        const Token = JWT.sign(obj,jwt_key)
->>>>>>> 140755ddaca3cfd596341c1ce13bd55306481c51
         res.cookie("Token",Token)
         console.log(result)
         const data = {
@@ -212,14 +163,14 @@ app.get('/getAllExercises', async (req, res) => {
     let result;
     try {
         let userId = req.data.id;
-        result = await User.findById(userId).populate("exercises")
+        result = await User.findById(userId).populate("exercises");
+        //const r = await JSON.stringify(result);
+        res.send(result.exercises);
     }
     catch(err){
         console.log(err.message);
         res.send(err.message)
     }
-    //const r = await JSON.stringify(result);
-    res.send(result.exercises);
 })
 app.get('/getUser', async (req, res)=>{
     const id = req.data.id;
@@ -267,33 +218,12 @@ app.post('/deleteExerciseById', async (req, res)=>{
         res.status(404).send(error.message);
     }
 })
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> 140755ddaca3cfd596341c1ce13bd55306481c51
 app.get('/logout', (req, res)=>{
     //const userId = req.data.id;
     req.cookie("Token", null);
 })
 
-<<<<<<< HEAD
-
-if(process.env.NODE_ENV == 'production'){
-    const path = require('path');
-    
-    app.get('/', (req, res)=>{
-        app.use(express.static(path.resolve(__dirname, 'client', 'build')))
-        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
-    })
-}
-
-
-
-=======
 // Listening Server
->>>>>>> 140755ddaca3cfd596341c1ce13bd55306481c51
 app.listen(3000, ()=>{
     console.log("App is listening at port 3000")
 })
