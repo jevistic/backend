@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const DBconfig = require('./config/DBconfig');
-
 const cors = require('cors');
 const cookieParser =  require("cookie-parser")
 const JWT = require('jsonwebtoken')
@@ -12,14 +11,10 @@ const Exercise = require("./Models/Exercise");
 const Middlewares = require('./Middlewares/Middlewares')
 // const APIs = require('./Routes/api')
 
-// Init Modules
-
-
 const {JWT_KEY} = require('./config/keys')
 
 //Connect to DB
 DBconfig();
-
 
 //Middleware to parse res.body
 app.use(express.json())
