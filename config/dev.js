@@ -1,4 +1,4 @@
 module.exports = {
     JWT_KEY : 'hfjksdhfjkg',
-    MONGO_URI : 'mongodb+srv://jevistic:jevistic@cluster0.g54okli.mongodb.net/?retryWrites=true&w=majority'
+    MONGO_URI : 'mongodb://127.0.0.1:27017/users'
 }
